@@ -78,7 +78,6 @@ void setPWMToFan(int speed) {
   case 3: // fan stopped
     analogWrite(fanPin, 0);
     break;
-    
       
   default: // fan is switch-off
     analogWrite(fanPin, 0);
@@ -122,47 +121,31 @@ int checkTimeLimit(int maxTime) {
 
 // timing for fan running
 void switchFanOnOff() {
-  /*
-  if ((minuty >= 0) && (minuty < 10)) { //ventilator at bezi prvnich deset minut v kazde hodine
-    ledYellowState = HIGH;
-    fanState = HIGH;
-
-  } else {
-    ledYellowState = LOW;
-    fanState = LOW; 
-    //Serial.println("fanState = LOW");
-  }
-  */  
-  if ((((senzorDSBox.getTempCByIndex(0) + calibDSBox) <= tempLimit) && 
-      ((senzorDSBox.getTempCByIndex(0) + calibDSBox) > tempFreeze)) &&
-      checkTimeLimit(10)) 
+  if ((((senzorDSBox.getTempCByIndex(0) + calibDSBox) <= tempLimit) && ((senzorDSBox.getTempCByIndex(0) + calibDSBox) > tempFreeze)) && checkTimeLimit(10)) 
     {
       setPWMToFan(2);
       ledYellowState = LOW;
       blinkBlueLed();
       Serial.println("low speed of fan - cold (< 8dgr. of C.)");
     }
-    else if (((senzorDSBox.getTempCByIndex(0) + calibDSBox) <= tempFreeze) &&
-    checkTimeLimit(5))
-  {
+    else if (((senzorDSBox.getTempCByIndex(0) + calibDSBox) <= tempFreeze) && checkTimeLimit(5))
+    {
       setPWMToFan(2);
       ledYellowState = LOW;
       onBlueLed();
       Serial.println("low speed of fan - freeze");
-  } 
-    else if (((senzorDSBox.getTempCByIndex(0) + calibDSBox) > tempLimit) &&
-    checkTimeLimit(15))
-  {
+    } 
+    else if (((senzorDSBox.getTempCByIndex(0) + calibDSBox) > tempLimit) && checkTimeLimit(15))
+    {
       setPWMToFan(2);
       ledYellowState = HIGH;
       ledBlueState = LOW;
       Serial.println("high speed of fan");
-  }
+    }
     else {
       setPWMToFan(3);
       Serial.println("fan off");
     }
-  
 }
 
 void loop() {
@@ -206,7 +189,6 @@ void loop() {
   } else {
     analogWrite(ledYellowPin, 0); 
   }
-
   
   //digitalWrite(ledBluePin, ledBlueState);
   if (ledBlueState == HIGH) {
