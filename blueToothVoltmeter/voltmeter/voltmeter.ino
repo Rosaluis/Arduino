@@ -2,13 +2,16 @@
  * DC voltmeter with bluetooht 
  */
 
+
+// na hornim PC je to arduino NANO na COM6
+
 const int analogInput1ch = 0;
 const int analogInput2ch = 0;
 
 float vout1ch = 0.0;
 float vin1ch = 0.0;
-float R11ch = 100000.0;
-float R21ch = 10000.0;
+float R11ch = 98800.0;
+float R21ch = 9920.0;
 int value1ch = 0;
 
 unsigned long previousMillis = 0;       // will store last time LED was updated
@@ -21,6 +24,7 @@ void setup() {
   Serial.begin(115200);
   pinMode(analogInput1ch, INPUT);
 }
+
 
 void loop() {
   unsigned long currentMillis = millis();
@@ -35,6 +39,8 @@ void loop() {
   if (vin1ch < 0.09) {
     vin1ch = 0.0;
   }
+
+  Serial.println(vin1ch);
 
   
 }
