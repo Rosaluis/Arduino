@@ -65,6 +65,11 @@ void kalibChannels() {
   digitalWrite(ledBlue, HIGH);
   Serial.println(sum_1chKalib);
   Serial.println(sum_2chKalib);
+  diffOfChannels = sum_1chKalib - sum_2chKalib;
+  Serial.println(diffOfChannels);
+  Serial.println("kalibrovano");
+  delay(1000);
+  digitalWrite(ledBlue, LOW);
 }
 
 void loop() {
@@ -112,16 +117,11 @@ void loop() {
     
     setiny_x10 = 0;
   }
-
-  if (btnCalibInputState == HIGH) { //pokud je tlacitko kalibrace 2. kanalu na 1. kanal drzeno > 1s.
-    if (current_x100 - previous_x100 >= 1000) {
+  
+  //pokud je tlacitko kalibrace 2. kanalu na 1. kanal drzeno > 1s.
+  if ((btnCalibInputState == HIGH) && ((current_x100 - previous_x100) >= 5000)) { 
       previous_x100 = current_x100;
       kalibChannels();              //zavolej funkci na kalibraci
-    } 
-  } else {
-    current_x100 = 0;
-  }
-
-  
+  } 
   
 }
