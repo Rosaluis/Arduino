@@ -60,13 +60,11 @@ void loop() {
     setiny = 0;
   }
 
-
   if (setiny_x10 == 100) { //vypocet napeti z prumeru sumy a 
     Serial.print("Channel No. 1: ");
     for (int i = 0; i<10; i++) {
       sum += arr_value_1ch[i];
     }
-    //value_1ch /= 10.0;
     vin_1ch = countVolage(sum);
     Serial.println(vin_1ch);
     setiny_x10 = 0;
