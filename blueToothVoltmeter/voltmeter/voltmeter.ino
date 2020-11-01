@@ -8,14 +8,22 @@
 const int analogInput_1ch = 0;      //cislo analogoveho vstupu 1. kanalu
 const int analogInput_2ch = 1;      //cislo analogoveho vstupu 2. kanalu
 
-float vout = 0.0;                   //z bit. prevedene napeti
-float vin = 0.0;                    //spocitane napeti z delice napeti
 float vin_1ch = 0.0;                //spocitane napeti z delice napeti 1. kanalu
 float R1_1ch = 98800.0;             //hodnota 100kOhm odporu delice napeti 1. kanalu
 float R2_1ch = 9920.0;              //hodnota 10kOhm odporu delice napeti 1. kanalu
 int value_1ch = 0;                  //bit. hodnota napeti z analogoveho vstupu arduino z 1. kanalu
 float offset_1ch = 0.946;           //offset 1. kanalu dany merenim napeti multimetrem
 int arr_value_1ch[] = {0,0,0,0,0,0,0,0,0,0}; //pole na prumerovani vysledku mereni z deseti vzorku
+
+float vin_2ch = 0.0;                //spocitane napeti z delice napeti 2. kanalu
+float R1_2ch = 98800.0;             //hodnota 100kOhm odporu delice napeti 2. kanalu
+float R2_2ch = 9920.0;              //hodnota 10kOhm odporu delice napeti 2. kanalu
+int value_2ch = 0;                  //bit. hodnota napeti z analogoveho vstupu arduino z 2. kanalu
+float offset_2ch = 0.946;           //offset 2. kanalu dany merenim napeti multimetrem
+int arr_value_2ch[] = {0,0,0,0,0,0,0,0,0,0}; //pole na prumerovani vysledku mereni z deseti vzorku
+
+float vout = 0.0;                   //z bit. prevedene napeti
+float vin = 0.0;                    //spocitane napeti z delice napeti
 long sum;                           //suma ze souctu hodnot ve vzorkach 
 int shiftNo = 0;                    //pomocna promenna pro postupne vycitani z pole
 
