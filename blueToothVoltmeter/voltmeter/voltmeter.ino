@@ -34,6 +34,8 @@ const long interval = 1;            //promenna pro cas
 int setiny = 0;                     //promenna pro cas
 int setiny_x10 = 0;                 //promenna pro cas
 
+int btnCalibInputState = 0;         //status tlacitka
+
 void setup() {
   Serial.begin(115200);
   Serial.println("Run ..."); 
@@ -56,6 +58,8 @@ float countVolage(int sumOfSamples, int channel) {
 }
 
 void loop() {
+  btnCalibInputState = digitalRead(btnCalibInput);
+  
   unsigned long currentMillis = millis(); //milisekundy od spusteni arduina
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
@@ -94,6 +98,11 @@ void loop() {
     setiny_x10 = 0;
   }
 
+  if (btnCalibInputState == HIGH) {
+    digitalWrite(ledBlue, HIGH);
+  } else {
+    digitalWrite(ledBlue, LOW);
+  }
 
   
   
