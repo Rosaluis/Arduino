@@ -61,6 +61,7 @@ void loop() {
 
   if (setiny == 10) {   //ziskani deseti vzorku a ulozeni do pole na zprumerovani
     arr_value_1ch[shiftNo] = analogRead(analogInput_1ch);
+    arr_value_2ch[shiftNo] = analogRead(analogInput_2ch);
     shiftNo += 1;
     if (shiftNo == 10) {
       shiftNo = 0;
@@ -77,8 +78,17 @@ void loop() {
     //value_1ch /= 10.0;
     vin_1ch = countVolage(sum);
     Serial.println(vin_1ch);
-    setiny_x10 = 0;
     sum = 0;
+
+    Serial.print("Channel No. 2: ");
+    for (int i = 0; i<10; i++) {
+      sum += arr_value_2ch[i];
+    }
+    vin_2ch = countVolage(sum);
+    Serial.println(vin_2ch);
+    sum = 0;
+    
+    setiny_x10 = 0;
   }
 
 
