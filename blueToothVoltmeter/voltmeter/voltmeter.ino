@@ -3,12 +3,8 @@
  */
 // na hornim PC je to arduino NANO na COM6
 
-const int analogInput_1ch = 0;      //cislo analogoveho vstupu 1. kanalu
-const int analogInput_2ch = 1;      //cislo analogoveho vstupu 2. kanalu
-const int btnCalibInput = 2;        //cislo digitalniho vstupu pro tlacitko na kalibraci 2. kanalu k 1. kanalu
-const int ledBlue = 5;              //cislo digitalniho vystupu pro modrou LEDku
-
-struct Channel
+/* Definice struktur ********************************************************************************************* */
+typedef struct 
 {
   float vin;                        //spocitane napeti z delice napeti
   float R1;                         //hodnota 100kOhm odporu delice napeti
@@ -18,32 +14,14 @@ struct Channel
   int arr_value[10];                //pole na prumerovani vysledku mereni z deseti vzorku
   long sum;                         //suma ze souctu hodnot ve vzorkach
   long sumKalib;                    //pomocna suma ze souctu hodnot ve vzorkach 1. kanalu pro porovnani s 2. kanalem
-};
-
-Channel ch1;
-Channel ch2;
-
-float vin_1ch = 0.0;                //spocitane napeti z delice napeti 1. kanalu
-float R1_1ch = 98800.0;             //hodnota 100kOhm odporu delice napeti 1. kanalu
-float R2_1ch = 9920.0;              //hodnota 10kOhm odporu delice napeti 1. kanalu
-int value_1ch = 0;                  //bit. hodnota napeti z analogoveho vstupu arduino z 1. kanalu
-float offset_1ch = 1.064;           //offset 1. kanalu dany merenim napeti multimetrem
-int arr_value_1ch[] = {0,0,0,0,0,0,0,0,0,0}; //pole na prumerovani vysledku mereni z deseti vzorku
-long sum_1ch = 0;                   //suma ze souctu hodnot ve vzorkach 1. kanalu
-long sum_1chKalib = 0;              //pomocna suma ze souctu hodnot ve vzorkach 1. kanalu pro porovnani s 2. kanalem
-
-float vin_2ch = 0.0;                //spocitane napeti z delice napeti 2. kanalu
-float R1_2ch = 99150.0;             //hodnota 100kOhm odporu delice napeti 2. kanalu
-float R2_2ch = 9900.0;              //hodnota 10kOhm odporu delice napeti 2. kanalu
-int value_2ch = 0;                  //bit. hodnota napeti z analogoveho vstupu arduino z 2. kanalu
-float offset_2ch = 1.065;           //offset 2. kanalu dany merenim napeti multimetrem
-int arr_value_2ch[] = {0,0,0,0,0,0,0,0,0,0}; //pole na prumerovani vysledku mereni z deseti vzorku
-long sum_2ch = 0;                   //suma ze souctu hodnot ve vzorkach 2. kanalu
-long sum_2chKalib = 0;              //pomocna suma ze souctu hodnot ve vzorkach 2. kanalu pro porovnani s 1. kanalem
+} channel;                          //struktura channel pro praci s analogovym okruhem zarizeni
 
 
 
-
+const int analogInput_1ch = 0;      //cislo analogoveho vstupu 1. kanalu
+const int analogInput_2ch = 1;      //cislo analogoveho vstupu 2. kanalu
+const int btnCalibInput = 2;        //cislo digitalniho vstupu pro tlacitko na kalibraci 2. kanalu k 1. kanalu
+const int ledBlue = 5;              //cislo digitalniho vystupu pro modrou LEDku
 
 int diffOfChannels = 0;             //rozdil 2. kanalu od 1. kanalu pro kalibraci
 
@@ -59,7 +37,18 @@ int setiny_x100 = 0;                 //promenna pro cas
 
 int btnCalibInputState = LOW;         //status tlacitka
 
+channel ch1;                        //vytvoreni promenne ch1, ktera je typ: struktura channel
+channel ch2;                        //vytvoreni promenne ch1, ktera je typ: struktura channel
+
 void setup() {
+  ch1.R1 = 98800.0;                   //hodnota 100kOhm odporu delice napeti 1. kanalu
+  ch1.R2 = 9920.0;                    //hodnota 10kOhm odporu delice napeti 1. kanalu
+  ch1.offset = 1.064;             //offset 1. kanalu dany merenim napeti multimetrem
+  
+  ch2.R1 = 99150.0;                   //hodnota 100kOhm odporu delice napeti 2. kanalu
+  ch2.R2 = 9900.0;                    //hodnota 10kOhm odporu delice napeti 2. kanalu
+  ch2.offset = 1.065;                 //offset 2. kanalu dany merenim napeti multimetrem
+  
   Serial.begin(115200);
   Serial.println("Run ..."); 
   pinMode(analogInput_1ch, INPUT);
@@ -71,9 +60,9 @@ void setup() {
 float countVolage(int sumOfSamples, int channel) {
   vout = ((sumOfSamples / 10.0) / 1024.0);
   if (channel == 1) {
-    vin = vout / (R2_1ch/(R1_1ch+R2_1ch));
+    vin = vout / (ch1.R2/(ch1.R1 + ch2.R2));
   } else if (channel == 2) {
-    vin = vout / (R2_2ch/(R1_2ch+R2_2ch));
+    vin = vout / (ch2.R2/(ch2.R1 + ch2.R2));
   } else {
     vin = 666;
   }
@@ -83,9 +72,9 @@ float countVolage(int sumOfSamples, int channel) {
 void kalibChannels() {
   
   digitalWrite(ledBlue, HIGH);
-  Serial.println(sum_1chKalib);
-  Serial.println(sum_2chKalib);
-  diffOfChannels = sum_1chKalib - sum_2chKalib;
+  Serial.println(ch1.sumKalib);
+  Serial.println(ch2.sumKalib);
+  diffOfChannels = ch1.sumKalib - ch2.sumKalib;
   Serial.println(diffOfChannels);
   Serial.println("kalibrovano");
   delay(1000);
@@ -107,8 +96,8 @@ void loop() {
   
 
   if (setiny == 10) {                 //ziskani deseti vzorku a ulozeni do pole na zprumerovani
-    arr_value_1ch[shiftNo] = analogRead(analogInput_1ch);
-    arr_value_2ch[shiftNo] = analogRead(analogInput_2ch);
+    ch1.arr_value[shiftNo] = analogRead(analogInput_1ch);
+    ch2.arr_value[shiftNo] = analogRead(analogInput_2ch);
     shiftNo += 1;
     if (shiftNo == 10) {
       shiftNo = 0;
@@ -120,21 +109,21 @@ void loop() {
   if (setiny_x10 == 1000) { //vypocet napeti z prumeru sumy a 
     Serial.print("Channel No. 1: ");
     for (int i = 0; i<10; i++) {
-      sum_1ch += arr_value_1ch[i];
+      ch1.sum += ch1.arr_value[i];
     }
-    vin_1ch = countVolage(sum_1ch, 1) * offset_1ch;
-    Serial.println(vin_1ch);
-    sum_1chKalib = sum_1ch;
-    sum_1ch = 0;
+    ch1.vin = countVolage(ch1.sum, 1) * ch1.offset;
+    Serial.println(ch2.vin);
+    ch1.sumKalib = ch1.sum;
+    ch1.sum = 0;
 
     Serial.print("Channel No. 2: ");
     for (int i = 0; i<10; i++) {
-      sum_2ch += arr_value_2ch[i];
+      ch2.sum += ch2.arr_value[i];
     }
-    vin_2ch = countVolage(sum_2ch, 2) * offset_2ch;
-    Serial.println(vin_2ch);
-    sum_2chKalib = sum_2ch;
-    sum_2ch = 0;
+    ch2.vin = countVolage(ch2.sum, 2) * ch2.offset;
+    Serial.println(ch2.vin);
+    ch2.sumKalib = ch2.sum;
+    ch2.sum = 0;
     
     setiny_x10 = 0;
   }
