@@ -26,18 +26,20 @@ typedef struct
 
 typedef struct
 {
-  int diffOfChannels;             //rozdil 2. kanalu od 1. kanalu pro kalibraci
-  float vout;                   //z bit. prevedene napeti
-  float vin;                    //spocitane napeti z delice napeti
-  int shiftNo;                    //pomocna promenna pro postupne vycitani z pole
-  unsigned long previousMillis;   //promenna pro cas
+  int diffOfChannels;                 //rozdil 2. kanalu od 1. kanalu pro kalibraci
+  float vout;                         //z bit. prevedene napeti
+  float vin;                          //spocitane napeti z delice napeti
+  int shiftNo;                        //pomocna promenna pro postupne vycitani z pole
+  unsigned long previousMillis;       //promenna pro cas
   unsigned long  prevMls;
-  int interval;            //promenna pro cas
-  int setiny;                     //promenna pro cas
-  int setiny_x10;                 //promenna pro cas
-  int setiny_x100;                //promenna pro cas
-  int btnCalibInputState;       //status tlacitka
+  int interval;                       //promenna pro cas
+  int setiny;                         //promenna pro cas
+  int setiny_x10;                     //promenna pro cas
+  int setiny_x100;                    //promenna pro cas
+  int btnCalibInputState;             //status tlacitka
 } vars;
+/* Definice struktur - konec ************************************************************************************* */
+
 
 channel ch1;                          //vytvoreni promenne ch1, ktera je typ: struktura channel
 channel ch2;                          //vytvoreni promenne ch1, ktera je typ: struktura channel
@@ -51,18 +53,17 @@ void setup() {
   ch2.R1 = 99150.0;                   //hodnota 100kOhm odporu delice napeti 2. kanalu
   ch2.R2 = 9900.0;                    //hodnota 10kOhm odporu delice napeti 2. kanalu
   ch2.offset = 1.065;                 //offset 2. kanalu dany merenim napeti multimetrem
-
   var.diffOfChannels = 0;             //rozdil 2. kanalu od 1. kanalu pro kalibraci
   var.vout = 0.0;                     //z bit. prevedene napeti
   var.vin = 0.0;                      //spocitane napeti z delice napeti
   var.shiftNo = 0;                    //pomocna promenna pro postupne vycitani z pole
-  var.previousMillis = 0;             //promenna pro cas
-  var.prevMls = 0;
-  var.interval = 1;                   //promenna pro cas
-  var.setiny = 0;                     //promenna pro cas
-  var.setiny_x10 = 0;                 //promenna pro cas
-  var.setiny_x100 = 0;                //promenna pro cas
-  var.btnCalibInputState = LOW;       //status tlacitka
+  var.previousMillis = 0;             //promenna pro cas cyklu mereni
+  var.prevMls = 0;                    //promenna pro cas drzeni tlacitka
+  var.interval = 1;                   //promenna pro cas tisicin sekund
+  var.setiny = 0;                     //promenna pro cas cyklu jednoho mereni
+  var.setiny_x10 = 0;                 //promenna pro cas cyklu zprumerovani deseti mereni
+  var.setiny_x100 = 0;                //promenna pro cas cyklu drzeni tlacitka kalibrace
+  var.btnCalibInputState = LOW;       //status tlacitka kalibrace
 
   
   Serial.begin(115200);
@@ -71,7 +72,7 @@ void setup() {
   pinMode(pofa.analogInput_2ch, INPUT);
   pinMode(pofa.btnCalibInput, INPUT);
   pinMode(pofa.ledBlue, OUTPUT);
-  analogReference(INTERNAL);        //interni reference 1.1V pro presnejsi mereni anal. vstupu
+  analogReference(INTERNAL);          //interni reference 1.1V pro presnejsi mereni anal. vstupu
 }
 
 float countVolage(int sumOfSamples, int channel) {
@@ -155,5 +156,4 @@ void loop() {
     var.setiny_x100 = 0;                    //vynulovani promennych aby musela pred volanim fce kalibChannels()
     var.prevMls = 0;                        //zase tlacitko drzeno 
   }
-  
 }
