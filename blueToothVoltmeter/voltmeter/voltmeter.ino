@@ -8,6 +8,21 @@ const int analogInput_2ch = 1;      //cislo analogoveho vstupu 2. kanalu
 const int btnCalibInput = 2;        //cislo digitalniho vstupu pro tlacitko na kalibraci 2. kanalu k 1. kanalu
 const int ledBlue = 5;              //cislo digitalniho vystupu pro modrou LEDku
 
+struct Channel
+{
+  float vin;                        //spocitane napeti z delice napeti
+  float R1;                         //hodnota 100kOhm odporu delice napeti
+  float R2;                         //hodnota 10kOhm odporu delice napeti
+  int value;                        //bit. hodnota napeti z analogoveho vstupu arduino
+  float offset;                     //offset kanalu dany merenim napeti multimetrem
+  int arr_value[10];                //pole na prumerovani vysledku mereni z deseti vzorku
+  long sum;                         //suma ze souctu hodnot ve vzorkach
+  long sumKalib;                    //pomocna suma ze souctu hodnot ve vzorkach 1. kanalu pro porovnani s 2. kanalem
+};
+
+Channel ch1;
+Channel ch2;
+
 float vin_1ch = 0.0;                //spocitane napeti z delice napeti 1. kanalu
 float R1_1ch = 98800.0;             //hodnota 100kOhm odporu delice napeti 1. kanalu
 float R2_1ch = 9920.0;              //hodnota 10kOhm odporu delice napeti 1. kanalu
@@ -26,17 +41,7 @@ int arr_value_2ch[] = {0,0,0,0,0,0,0,0,0,0}; //pole na prumerovani vysledku mere
 long sum_2ch = 0;                   //suma ze souctu hodnot ve vzorkach 2. kanalu
 long sum_2chKalib = 0;              //pomocna suma ze souctu hodnot ve vzorkach 2. kanalu pro porovnani s 1. kanalem
 
-struct channel
-{
-  float vin;                        //spocitane napeti z delice napeti
-  float R1;                         //hodnota 100kOhm odporu delice napeti
-  float R2;                         //hodnota 10kOhm odporu delice napeti
-  int value;                        //bit. hodnota napeti z analogoveho vstupu arduino
-  float offset;                     //offset kanalu dany merenim napeti multimetrem
-  int arr_value[10];                //pole na prumerovani vysledku mereni z deseti vzorku
-  long sum;                         //suma ze souctu hodnot ve vzorkach
-  long sumKalib;                    //pomocna suma ze souctu hodnot ve vzorkach 1. kanalu pro porovnani s 2. kanalem
-};
+
 
 
 
