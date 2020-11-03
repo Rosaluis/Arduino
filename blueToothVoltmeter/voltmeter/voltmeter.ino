@@ -6,15 +6,15 @@
 /* Definice struktur ********************************************************************************************* */
 typedef struct 
 {
-  float vin;                        //spocitane napeti z delice napeti
-  float R1;                         //hodnota 100kOhm odporu delice napeti
-  float R2;                         //hodnota 10kOhm odporu delice napeti
-  int value;                        //bit. hodnota napeti z analogoveho vstupu arduino
-  float offset;                     //offset kanalu dany merenim napeti multimetrem
-  int arr_value[10];                //pole na prumerovani vysledku mereni z deseti vzorku
-  long sum;                         //suma ze souctu hodnot ve vzorkach
-  long sumKalib;                    //pomocna suma ze souctu hodnot ve vzorkach 1. kanalu pro porovnani s 2. kanalem
-} channel;                          //struktura channel pro praci s analogovym okruhem zarizeni
+  float vin;                          //spocitane napeti z delice napeti
+  float R1;                           //hodnota 100kOhm odporu delice napeti
+  float R2;                           //hodnota 10kOhm odporu delice napeti
+  int value;                          //bit. hodnota napeti z analogoveho vstupu arduino
+  float offset;                       //offset kanalu dany merenim napeti multimetrem
+  int arr_value[10];                  //pole na prumerovani vysledku mereni z deseti vzorku
+  long sum;                           //suma ze souctu hodnot ve vzorkach
+  long sumKalib;                      //pomocna suma ze souctu hodnot ve vzorkach 1. kanalu pro porovnani s 2. kanalem
+} channel;                            //struktura channel pro praci s analogovym okruhem zarizeni
 
 typedef struct
 {
@@ -24,33 +24,46 @@ typedef struct
   const int ledBlue = 5;              //cislo digitalniho vystupu pro modrou LEDku
 } pinOfArdu;
 
+typedef struct
+{
+  int diffOfChannels;             //rozdil 2. kanalu od 1. kanalu pro kalibraci
+  float vout;                   //z bit. prevedene napeti
+  float vin;                    //spocitane napeti z delice napeti
+  int shiftNo;                    //pomocna promenna pro postupne vycitani z pole
+  unsigned long previousMillis;   //promenna pro cas
+  unsigned long  prevMls;
+  int interval;            //promenna pro cas
+  int setiny;                     //promenna pro cas
+  int setiny_x10;                 //promenna pro cas
+  int setiny_x100;                //promenna pro cas
+  int btnCalibInputState;       //status tlacitka
+} vars;
 
-int diffOfChannels = 0;             //rozdil 2. kanalu od 1. kanalu pro kalibraci
-
-float vout = 0.0;                   //z bit. prevedene napeti
-float vin = 0.0;                    //spocitane napeti z delice napeti
-int shiftNo = 0;                    //pomocna promenna pro postupne vycitani z pole
-unsigned long previousMillis = 0;   //promenna pro cas
-unsigned long  prevMls = 0;
-const long interval = 1;            //promenna pro cas
-int setiny = 0;                     //promenna pro cas
-int setiny_x10 = 0;                 //promenna pro cas
-int setiny_x100 = 0;                 //promenna pro cas
-
-int btnCalibInputState = LOW;         //status tlacitka
-
-channel ch1;                        //vytvoreni promenne ch1, ktera je typ: struktura channel
-channel ch2;                        //vytvoreni promenne ch1, ktera je typ: struktura channel
-pinOfArdu pofa;                     //vytvoreni promenne pofak, ktera je typ: struktura pinOfArdu
+channel ch1;                          //vytvoreni promenne ch1, ktera je typ: struktura channel
+channel ch2;                          //vytvoreni promenne ch1, ktera je typ: struktura channel
+pinOfArdu pofa;                       //vytvoreni promenne pofa, ktera je typ: struktura pinOfArdu
+vars var;                             //vytvoreni promenne var, ktera je typ: struktura vars
 
 void setup() {
   ch1.R1 = 98800.0;                   //hodnota 100kOhm odporu delice napeti 1. kanalu
   ch1.R2 = 9920.0;                    //hodnota 10kOhm odporu delice napeti 1. kanalu
-  ch1.offset = 1.064;             //offset 1. kanalu dany merenim napeti multimetrem
-  
+  ch1.offset = 1.064;                 //offset 1. kanalu dany merenim napeti multimetrem
   ch2.R1 = 99150.0;                   //hodnota 100kOhm odporu delice napeti 2. kanalu
   ch2.R2 = 9900.0;                    //hodnota 10kOhm odporu delice napeti 2. kanalu
   ch2.offset = 1.065;                 //offset 2. kanalu dany merenim napeti multimetrem
+
+  var.diffOfChannels = 0;             //rozdil 2. kanalu od 1. kanalu pro kalibraci
+  var.vout = 0.0;                     //z bit. prevedene napeti
+  var.vin = 0.0;                      //spocitane napeti z delice napeti
+  var.shiftNo = 0;                    //pomocna promenna pro postupne vycitani z pole
+  var.previousMillis = 0;             //promenna pro cas
+  var.prevMls = 0;
+  var.interval = 1;                   //promenna pro cas
+  var.setiny = 0;                     //promenna pro cas
+  var.setiny_x10 = 0;                 //promenna pro cas
+  var.setiny_x100 = 0;                //promenna pro cas
+  var.btnCalibInputState = LOW;       //status tlacitka
+
   
   Serial.begin(115200);
   Serial.println("Run ..."); 
@@ -62,15 +75,15 @@ void setup() {
 }
 
 float countVolage(int sumOfSamples, int channel) {
-  vout = ((sumOfSamples / 10.0) / 1024.0);
+  var.vout = ((sumOfSamples / 10.0) / 1024.0);
   if (channel == 1) {
-    vin = vout / (ch1.R2/(ch1.R1 + ch2.R2));
+    var.vin = var.vout / (ch1.R2/(ch1.R1 + ch2.R2));
   } else if (channel == 2) {
-    vin = vout / (ch2.R2/(ch2.R1 + ch2.R2));
+    var.vin = var.vout / (ch2.R2/(ch2.R1 + ch2.R2));
   } else {
-    vin = 666;
+    var.vin = 666;
   }
-  return(vin);
+  return(var.vin);
 }
 
 void kalibChannels() {
@@ -78,8 +91,8 @@ void kalibChannels() {
   digitalWrite(pofa.ledBlue, HIGH);
   Serial.println(ch1.sumKalib);
   Serial.println(ch2.sumKalib);
-  diffOfChannels = ch1.sumKalib - ch2.sumKalib;
-  Serial.println(diffOfChannels);
+  var.diffOfChannels = ch1.sumKalib - ch2.sumKalib;
+  Serial.println(var.diffOfChannels);
   Serial.println("kalibrovano");
   delay(1000);
   digitalWrite(pofa.ledBlue, LOW);
@@ -87,30 +100,30 @@ void kalibChannels() {
 }
 
 void loop() {
-  btnCalibInputState = digitalRead(pofa.btnCalibInput);
+  var.btnCalibInputState = digitalRead(pofa.btnCalibInput);
   
   unsigned long currentMillis = millis();             //milisekundy od spusteni arduina
-  if (currentMillis - previousMillis >= interval) {
-    previousMillis = currentMillis;
-    setiny += 1;
-    setiny_x10 += 1;
-    setiny_x100 += 1;
+  if (currentMillis - var.previousMillis >= var.interval) {
+    var.previousMillis = currentMillis;
+    var.setiny += 1;
+    var.setiny_x10 += 1;
+    var.setiny_x100 += 1;
   }
 
   
 
-  if (setiny == 10) {                 //ziskani deseti vzorku a ulozeni do pole na zprumerovani
-    ch1.arr_value[shiftNo] = analogRead(pofa.analogInput_1ch);
-    ch2.arr_value[shiftNo] = analogRead(pofa.analogInput_2ch);
-    shiftNo += 1;
-    if (shiftNo == 10) {
-      shiftNo = 0;
+  if (var.setiny == 10) {                 //ziskani deseti vzorku a ulozeni do pole na zprumerovani
+    ch1.arr_value[var.shiftNo] = analogRead(pofa.analogInput_1ch);
+    ch2.arr_value[var.shiftNo] = analogRead(pofa.analogInput_2ch);
+    var.shiftNo += 1;
+    if (var.shiftNo == 10) {
+      var.shiftNo = 0;
     }
-    setiny = 0;
+    var.setiny = 0;
   }
 
 
-  if (setiny_x10 == 1000) { //vypocet napeti z prumeru sumy a 
+  if (var.setiny_x10 == 1000) { //vypocet napeti z prumeru sumy a 
     Serial.print("Channel No. 1: ");
     for (int i = 0; i<10; i++) {
       ch1.sum += ch1.arr_value[i];
@@ -129,18 +142,18 @@ void loop() {
     ch2.sumKalib = ch2.sum;
     ch2.sum = 0;
     
-    setiny_x10 = 0;
+    var.setiny_x10 = 0;
   }
   
   //pokud je tlacitko kalibrace 2. kanalu na 1. kanal drzeno > 1s.
-  if (btnCalibInputState == HIGH) {
-    if (setiny_x100 - prevMls >= 1000) {
-      prevMls = setiny_x100;
+  if (var.btnCalibInputState == HIGH) {
+    if (var.setiny_x100 - var.prevMls >= 1000) {
+      var.prevMls = var.setiny_x100;
       kalibChannels();                  //zavolej funkci na kalibraci  
     }
   } else {
-    setiny_x100 = 0;                    //vynulovani promennych aby musela pred volanim fce kalibChannels()
-    prevMls = 0;                        //zase tlacitko drzeno 
+    var.setiny_x100 = 0;                    //vynulovani promennych aby musela pred volanim fce kalibChannels()
+    var.prevMls = 0;                        //zase tlacitko drzeno 
   }
   
 }
