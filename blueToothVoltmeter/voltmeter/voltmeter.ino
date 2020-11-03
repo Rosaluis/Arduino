@@ -32,13 +32,14 @@ float vout = 0.0;                   //z bit. prevedene napeti
 float vin = 0.0;                    //spocitane napeti z delice napeti
 int shiftNo = 0;                    //pomocna promenna pro postupne vycitani z pole
 unsigned long previousMillis = 0;   //promenna pro cas
+unsigned long  prevMls = 0;
 const long interval = 1;            //promenna pro cas
 int setiny = 0;                     //promenna pro cas
 int setiny_x10 = 0;                 //promenna pro cas
 int current_x100 = 0;               //promenna pro cas stisknuteho tlacitka
 int previous_x100 = 0;              //promenna pro cas stisknuteho tlacitka
 
-int btnCalibInputState = 0;         //status tlacitka
+int btnCalibInputState = LOW;         //status tlacitka
 
 void setup() {
   Serial.begin(115200);
@@ -62,14 +63,24 @@ float countVolage(int sumOfSamples, int channel) {
 }
 
 void kalibChannels() {
-  digitalWrite(ledBlue, HIGH);
-  Serial.println(sum_1chKalib);
-  Serial.println(sum_2chKalib);
-  diffOfChannels = sum_1chKalib - sum_2chKalib;
-  Serial.println(diffOfChannels);
-  Serial.println("kalibrovano");
-  delay(1000);
-  digitalWrite(ledBlue, LOW);
+  //Serial.println("pressed...");
+  unsigned long currMls = millis(); //milisekundy od spusteni arduina
+  //Serial.println(currMls);
+  
+  if (currMls - prevMls >= 1000) {
+    prevMls = currMls;
+
+    digitalWrite(ledBlue, HIGH);
+    Serial.println(sum_1chKalib);
+    Serial.println(sum_2chKalib);
+    diffOfChannels = sum_1chKalib - sum_2chKalib;
+    Serial.println(diffOfChannels);
+    Serial.println("kalibrovano");
+    digitalWrite(ledBlue, LOW);
+    
+  }
+
+  
 }
 
 void loop() {
@@ -85,7 +96,7 @@ void loop() {
 
   
 
-  if (setiny == 10) {   //ziskani deseti vzorku a ulozeni do pole na zprumerovani
+  if (setiny == 10) {                 //ziskani deseti vzorku a ulozeni do pole na zprumerovani
     arr_value_1ch[shiftNo] = analogRead(analogInput_1ch);
     arr_value_2ch[shiftNo] = analogRead(analogInput_2ch);
     shiftNo += 1;
@@ -119,9 +130,8 @@ void loop() {
   }
   
   //pokud je tlacitko kalibrace 2. kanalu na 1. kanal drzeno > 1s.
-  if ((btnCalibInputState == HIGH) && ((current_x100 - previous_x100) >= 5000)) { 
-      previous_x100 = current_x100;
-      kalibChannels();              //zavolej funkci na kalibraci
+  if (btnCalibInputState == HIGH) {
+      kalibChannels();                  //zavolej funkci na kalibraci
   } 
   
 }
