@@ -16,12 +16,14 @@ typedef struct
   long sumKalib;                    //pomocna suma ze souctu hodnot ve vzorkach 1. kanalu pro porovnani s 2. kanalem
 } channel;                          //struktura channel pro praci s analogovym okruhem zarizeni
 
+typedef struct
+{
+  const int analogInput_1ch = 0;      //cislo analogoveho vstupu 1. kanalu
+  const int analogInput_2ch = 1;      //cislo analogoveho vstupu 2. kanalu
+  const int btnCalibInput = 2;        //cislo digitalniho vstupu pro tlacitko na kalibraci 2. kanalu k 1. kanalu
+  const int ledBlue = 5;              //cislo digitalniho vystupu pro modrou LEDku
+} pinOfArdu;
 
-
-const int analogInput_1ch = 0;      //cislo analogoveho vstupu 1. kanalu
-const int analogInput_2ch = 1;      //cislo analogoveho vstupu 2. kanalu
-const int btnCalibInput = 2;        //cislo digitalniho vstupu pro tlacitko na kalibraci 2. kanalu k 1. kanalu
-const int ledBlue = 5;              //cislo digitalniho vystupu pro modrou LEDku
 
 int diffOfChannels = 0;             //rozdil 2. kanalu od 1. kanalu pro kalibraci
 
@@ -39,6 +41,7 @@ int btnCalibInputState = LOW;         //status tlacitka
 
 channel ch1;                        //vytvoreni promenne ch1, ktera je typ: struktura channel
 channel ch2;                        //vytvoreni promenne ch1, ktera je typ: struktura channel
+pinOfArdu pofa;                     //vytvoreni promenne pofak, ktera je typ: struktura pinOfArdu
 
 void setup() {
   ch1.R1 = 98800.0;                   //hodnota 100kOhm odporu delice napeti 1. kanalu
@@ -51,9 +54,10 @@ void setup() {
   
   Serial.begin(115200);
   Serial.println("Run ..."); 
-  pinMode(analogInput_1ch, INPUT);
-  pinMode(btnCalibInput, INPUT);
-  pinMode(ledBlue, OUTPUT);
+  pinMode(pofa.analogInput_1ch, INPUT);
+  pinMode(pofa.analogInput_2ch, INPUT);
+  pinMode(pofa.btnCalibInput, INPUT);
+  pinMode(pofa.ledBlue, OUTPUT);
   analogReference(INTERNAL);        //interni reference 1.1V pro presnejsi mereni anal. vstupu
 }
 
@@ -71,19 +75,19 @@ float countVolage(int sumOfSamples, int channel) {
 
 void kalibChannels() {
   
-  digitalWrite(ledBlue, HIGH);
+  digitalWrite(pofa.ledBlue, HIGH);
   Serial.println(ch1.sumKalib);
   Serial.println(ch2.sumKalib);
   diffOfChannels = ch1.sumKalib - ch2.sumKalib;
   Serial.println(diffOfChannels);
   Serial.println("kalibrovano");
   delay(1000);
-  digitalWrite(ledBlue, LOW);
+  digitalWrite(pofa.ledBlue, LOW);
   
 }
 
 void loop() {
-  btnCalibInputState = digitalRead(btnCalibInput);
+  btnCalibInputState = digitalRead(pofa.btnCalibInput);
   
   unsigned long currentMillis = millis();             //milisekundy od spusteni arduina
   if (currentMillis - previousMillis >= interval) {
@@ -96,8 +100,8 @@ void loop() {
   
 
   if (setiny == 10) {                 //ziskani deseti vzorku a ulozeni do pole na zprumerovani
-    ch1.arr_value[shiftNo] = analogRead(analogInput_1ch);
-    ch2.arr_value[shiftNo] = analogRead(analogInput_2ch);
+    ch1.arr_value[shiftNo] = analogRead(pofa.analogInput_1ch);
+    ch2.arr_value[shiftNo] = analogRead(pofa.analogInput_2ch);
     shiftNo += 1;
     if (shiftNo == 10) {
       shiftNo = 0;
