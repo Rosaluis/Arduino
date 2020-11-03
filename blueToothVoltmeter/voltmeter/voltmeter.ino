@@ -26,6 +26,20 @@ int arr_value_2ch[] = {0,0,0,0,0,0,0,0,0,0}; //pole na prumerovani vysledku mere
 long sum_2ch = 0;                   //suma ze souctu hodnot ve vzorkach 2. kanalu
 long sum_2chKalib = 0;              //pomocna suma ze souctu hodnot ve vzorkach 2. kanalu pro porovnani s 1. kanalem
 
+struct channel
+{
+  float vin;                        //spocitane napeti z delice napeti
+  float R1;                         //hodnota 100kOhm odporu delice napeti
+  float R2;                         //hodnota 10kOhm odporu delice napeti
+  int value;                        //bit. hodnota napeti z analogoveho vstupu arduino
+  float offset;                     //offset kanalu dany merenim napeti multimetrem
+  int arr_value[10];                //pole na prumerovani vysledku mereni z deseti vzorku
+  long sum;                         //suma ze souctu hodnot ve vzorkach
+  long sumKalib;                    //pomocna suma ze souctu hodnot ve vzorkach 1. kanalu pro porovnani s 2. kanalem
+};
+
+
+
 int diffOfChannels = 0;             //rozdil 2. kanalu od 1. kanalu pro kalibraci
 
 float vout = 0.0;                   //z bit. prevedene napeti
