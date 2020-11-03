@@ -135,7 +135,8 @@ void loop() {
       //Serial.println(prevMls);
     }
   } else {
-    setiny_x100 = 0;
+    setiny_x100 = 0;                    //vynulovani promennych aby musela pred volanim fce kalibChannels()
+    prevMls = 0;                        //zase tlacitko drzeno 
   }
   
 }
