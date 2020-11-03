@@ -40,13 +40,15 @@ typedef struct
 } vars;
 /* Definice struktur - konec ************************************************************************************* */
 
-
+/* Deklarace promennych struktur ********************************************************************************* */
 channel ch1;                          //vytvoreni promenne ch1, ktera je typ: struktura channel
 channel ch2;                          //vytvoreni promenne ch1, ktera je typ: struktura channel
 pinOfArdu pofa;                       //vytvoreni promenne pofa, ktera je typ: struktura pinOfArdu
 vars var;                             //vytvoreni promenne var, ktera je typ: struktura vars
+/* Deklarace promennych struktur - konec ************************************************************************* */
 
 void setup() {
+  /* Inicializace promennych */
   ch1.R1 = 98800.0;                   //hodnota 100kOhm odporu delice napeti 1. kanalu
   ch1.R2 = 9920.0;                    //hodnota 10kOhm odporu delice napeti 1. kanalu
   ch1.offset = 1.064;                 //offset 1. kanalu dany merenim napeti multimetrem
@@ -64,7 +66,6 @@ void setup() {
   var.setiny_x10 = 0;                 //promenna pro cas cyklu zprumerovani deseti mereni
   var.setiny_x100 = 0;                //promenna pro cas cyklu drzeni tlacitka kalibrace
   var.btnCalibInputState = LOW;       //status tlacitka kalibrace
-
   
   Serial.begin(115200);
   Serial.println("Run ..."); 
@@ -75,33 +76,63 @@ void setup() {
   analogReference(INTERNAL);          //interni reference 1.1V pro presnejsi mereni anal. vstupu
 }
 
+/* Vypocet namerenych napeti z deseti ulozenych vzorku pro oba kanaly */
 float countVolage(int sumOfSamples, int channel) {
   var.vout = ((sumOfSamples / 10.0) / 1024.0);
-  if (channel == 1) {
+  switch (channel) {
+  case 1: // 1. channel 
     var.vin = var.vout / (ch1.R2/(ch1.R1 + ch2.R2));
-  } else if (channel == 2) {
+    break;
+    
+  case 2: // 2. channel 
     var.vin = var.vout / (ch2.R2/(ch2.R1 + ch2.R2));
-  } else {
-    var.vin = 666;
+    break;
+  
+  case 3: // kalibrace 
+    
+    break;
+      
+  default: // 
+    ;
+    break;
   }
   return(var.vin);
 }
 
-void kalibChannels() {
+
+
   
+
+
+/* Kalibrace 2. kanalu na hodnotu 1. kanalu */
+void kalibChannels() {
   digitalWrite(pofa.ledBlue, HIGH);
-  Serial.println(ch1.sumKalib);
-  Serial.println(ch2.sumKalib);
+  Serial.print(ch1.sumKalib);
+  Serial.print(" - ");
+  Serial.print(ch2.sumKalib);
+  Serial.print(" = ");
   var.diffOfChannels = ch1.sumKalib - ch2.sumKalib;
   Serial.println(var.diffOfChannels);
+  ch2.sumKalib += var.diffOfChannels;
+
+  
+
+
+  
   Serial.println("kalibrovano");
   delay(1000);
   digitalWrite(pofa.ledBlue, LOW);
-  
+
+  Serial.print(ch1.sumKalib);
+  Serial.print(" - ");
+  Serial.print(ch2.sumKalib);
+  Serial.print(" = ");
+  var.diffOfChannels = ch1.sumKalib - ch2.sumKalib;
+  Serial.println(var.diffOfChannels);
 }
 
 void loop() {
-  var.btnCalibInputState = digitalRead(pofa.btnCalibInput);
+  var.btnCalibInputState = digitalRead(pofa.btnCalibInput); //sledovani stavu = stisknuti tlacitka kalibrace
   
   unsigned long currentMillis = millis();             //milisekundy od spusteni arduina
   if (currentMillis - var.previousMillis >= var.interval) {
@@ -111,9 +142,8 @@ void loop() {
     var.setiny_x100 += 1;
   }
 
-  
-
-  if (var.setiny == 10) {                 //ziskani deseti vzorku a ulozeni do pole na zprumerovani
+  /*ziskani deseti vzorku a ulozeni do pole na zprumerovani */
+  if (var.setiny == 10) {                 
     ch1.arr_value[var.shiftNo] = analogRead(pofa.analogInput_1ch);
     ch2.arr_value[var.shiftNo] = analogRead(pofa.analogInput_2ch);
     var.shiftNo += 1;
