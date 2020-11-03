@@ -89,7 +89,7 @@ float countVolage(int sumOfSamples, int channel) {
     break;
   
   case 3: // kalibrace 
-    
+    var.vin = var.vout / (ch2.R2/(ch2.R1 + ch2.R2));
     break;
       
   default: // 
@@ -113,10 +113,13 @@ void kalibChannels() {
   Serial.print(" = ");
   var.diffOfChannels = ch1.sumKalib - ch2.sumKalib;
   Serial.println(var.diffOfChannels);
-  ch2.sumKalib += var.diffOfChannels;
-
-  
-
+  ch2.sumKalib += var.diffOfChannels; //jen pro kontrolu ve vypisu
+  ch2.offset = 0;
+  Serial.println(" ");
+  Serial.print(ch2.offset);
+  ch2.offset = countVolage((var.diffOfChannels), 3);  
+  Serial.print(" -> ");
+  Serial.println(ch2.offset);
 
   
   Serial.println("kalibrovano");
