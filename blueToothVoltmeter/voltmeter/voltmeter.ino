@@ -36,8 +36,7 @@ unsigned long  prevMls = 0;
 const long interval = 1;            //promenna pro cas
 int setiny = 0;                     //promenna pro cas
 int setiny_x10 = 0;                 //promenna pro cas
-int current_x100 = 0;               //promenna pro cas stisknuteho tlacitka
-int previous_x100 = 0;              //promenna pro cas stisknuteho tlacitka
+int setiny_x100 = 0;                 //promenna pro cas
 
 int btnCalibInputState = LOW;         //status tlacitka
 
@@ -63,35 +62,27 @@ float countVolage(int sumOfSamples, int channel) {
 }
 
 void kalibChannels() {
-  //Serial.println("pressed...");
-  unsigned long currMls = millis(); //milisekundy od spusteni arduina
-  //Serial.println(currMls);
   
-  if (currMls - prevMls >= 1000) {
-    prevMls = currMls;
-
-    digitalWrite(ledBlue, HIGH);
-    Serial.println(sum_1chKalib);
-    Serial.println(sum_2chKalib);
-    diffOfChannels = sum_1chKalib - sum_2chKalib;
-    Serial.println(diffOfChannels);
-    Serial.println("kalibrovano");
-    digitalWrite(ledBlue, LOW);
-    
-  }
-
+  digitalWrite(ledBlue, HIGH);
+  Serial.println(sum_1chKalib);
+  Serial.println(sum_2chKalib);
+  diffOfChannels = sum_1chKalib - sum_2chKalib;
+  Serial.println(diffOfChannels);
+  Serial.println("kalibrovano");
+  delay(1000);
+  digitalWrite(ledBlue, LOW);
   
 }
 
 void loop() {
   btnCalibInputState = digitalRead(btnCalibInput);
   
-  unsigned long currentMillis = millis(); //milisekundy od spusteni arduina
+  unsigned long currentMillis = millis();             //milisekundy od spusteni arduina
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
     setiny += 1;
     setiny_x10 += 1;
-    current_x100 += 1;
+    setiny_x100 += 1;
   }
 
   
@@ -130,8 +121,21 @@ void loop() {
   }
   
   //pokud je tlacitko kalibrace 2. kanalu na 1. kanal drzeno > 1s.
+
+  
   if (btnCalibInputState == HIGH) {
-      kalibChannels();                  //zavolej funkci na kalibraci
-  } 
+      //Serial.print(setiny_x100);
+      //Serial.print(" *** ");
+      //Serial.println(prevMls);
+    if (setiny_x100 - prevMls >= 1000) {
+      prevMls = setiny_x100;
+      kalibChannels();                  //zavolej funkci na kalibraci  
+      //Serial.print(setiny_x100);
+      //Serial.print(" --- ");
+      //Serial.println(prevMls);
+    }
+  } else {
+    setiny_x100 = 0;
+  }
   
 }
