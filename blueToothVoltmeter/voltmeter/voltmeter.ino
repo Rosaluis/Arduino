@@ -121,18 +121,10 @@ void loop() {
   }
   
   //pokud je tlacitko kalibrace 2. kanalu na 1. kanal drzeno > 1s.
-
-  
   if (btnCalibInputState == HIGH) {
-      //Serial.print(setiny_x100);
-      //Serial.print(" *** ");
-      //Serial.println(prevMls);
     if (setiny_x100 - prevMls >= 1000) {
       prevMls = setiny_x100;
       kalibChannels();                  //zavolej funkci na kalibraci  
-      //Serial.print(setiny_x100);
-      //Serial.print(" --- ");
-      //Serial.println(prevMls);
     }
   } else {
     setiny_x100 = 0;                    //vynulovani promennych aby musela pred volanim fce kalibChannels()
