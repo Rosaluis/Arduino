@@ -4,15 +4,10 @@
 // na hornim PC je to arduino NANO na COM6
 
 
-/* Definice propojovacich pinu externich modulu ****************************************************************** */
-#define RX 30
-#define TX 31
-#define pinLed 13
-/* Definice propojovacich pinu externich modulu - konec ********************************************************** */
 
 /* inicializace Bluetooth modulu ********************************************************************************* */
 #include <SoftwareSerial.h>
-SoftwareSerial bluetooth(TX, RX);   
+SoftwareSerial bluetooth(31, 30); //heslo pro parovani: 123456  
 /* inicializace Bluetooth modulu - konec ************************************************************************* */
 
 /* Definice struktur ********************************************************************************************* */
@@ -97,7 +92,7 @@ void setup() {
   analogReference(INTERNAL);          //interni reference 1.1V pro presnejsi mereni anal. vstupu
   bluetooth.begin(9600);
   bluetooth.println("Arduino zapnuto, test Bluetooth...");
-  pinMode(pinLed, OUTPUT);
+  bluetooth.println("123");
 }
 
 /* Vypocet namerenych napeti z deseti ulozenych vzorku pro oba kanaly */
@@ -127,7 +122,10 @@ void kalibChannels() {
   digitalWrite(pofa.ledBlue, HIGH);
   delay(1000);
   digitalWrite(pofa.ledBlue, LOW);
-
+  bluetooth.println("A");
+  bluetooth.println("Ahoj");
+  bluetooth.println("1");
+  bluetooth.println("12345678910");
 }
 
 void loop() {
