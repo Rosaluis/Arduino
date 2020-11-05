@@ -3,6 +3,18 @@
  */
 // na hornim PC je to arduino NANO na COM6
 
+
+/* Definice propojovacich pinu externich modulu ****************************************************************** */
+#define RX 30
+#define TX 31
+#define pinLed 13
+/* Definice propojovacich pinu externich modulu - konec ********************************************************** */
+
+/* inicializace Bluetooth modulu ********************************************************************************* */
+#include <SoftwareSerial.h>
+SoftwareSerial bluetooth(TX, RX);   
+/* inicializace Bluetooth modulu - konec ************************************************************************* */
+
 /* Definice struktur ********************************************************************************************* */
 typedef struct 
 {
@@ -38,6 +50,12 @@ typedef struct
   int setiny_x100;                    //promenna pro cas
   int btnCalibInputState;             //status tlacitka
 } vars;
+
+typedef struct
+{
+  byte data;
+} blth;
+
 /* Definice struktur - konec ************************************************************************************* */
 
 /* Deklarace promennych struktur ********************************************************************************* */
@@ -45,7 +63,10 @@ channel ch1;                          //vytvoreni promenne ch1, ktera je typ: st
 channel ch2;                          //vytvoreni promenne ch1, ktera je typ: struktura channel
 pinOfArdu pofa;                       //vytvoreni promenne pofa, ktera je typ: struktura pinOfArdu
 vars var;                             //vytvoreni promenne var, ktera je typ: struktura vars
+blth bt;                              //vytvoreni promenne bt, ktera je typ: struktury blth
 /* Deklarace promennych struktur - konec ************************************************************************* */
+
+
 
 void setup() {
   /* Inicializace promennych */
@@ -74,6 +95,9 @@ void setup() {
   pinMode(pofa.btnCalibInput, INPUT);
   pinMode(pofa.ledBlue, OUTPUT);
   analogReference(INTERNAL);          //interni reference 1.1V pro presnejsi mereni anal. vstupu
+  bluetooth.begin(9600);
+  bluetooth.println("Arduino zapnuto, test Bluetooth...");
+  pinMode(pinLed, OUTPUT);
 }
 
 /* Vypocet namerenych napeti z deseti ulozenych vzorku pro oba kanaly */
@@ -101,16 +125,8 @@ float countVolage(int sumOfSamples, int channel) {
 /* Kalibrace 2. kanalu na hodnotu 1. kanalu */
 void kalibChannels() {
   digitalWrite(pofa.ledBlue, HIGH);
-  Serial.print(ch1.sumKalib);
-  Serial.print(" - ");
-  Serial.print(ch2.sumKalib);
-  Serial.print(" = ");
-  var.diffOfChannels = ch1.sumKalib - ch2.sumKalib;
-  Serial.println(var.diffOfChannels);
-  Serial.println("kalibrovano");
   delay(1000);
   digitalWrite(pofa.ledBlue, LOW);
-  Serial.println(" ");
 
 }
 
@@ -144,7 +160,6 @@ void loop() {
     }
     ch1.vin = countVolage(ch1.sum, 1) * ch1.offset;
     Serial.println(ch2.vin);
-    ch1.sumKalib = ch1.sum;
     ch1.sum = 0;
 
     Serial.print("Channel No. 2: ");
@@ -154,7 +169,6 @@ void loop() {
     ch2.sum += var.diffOfChannels;
     ch2.vin = countVolage(ch2.sum, 2) * ch2.offset;
     Serial.println(ch2.vin);
-    ch2.sumKalib = ch2.sum;
     ch2.sum = 0;
     
     var.setiny_x10 = 0;
@@ -164,7 +178,7 @@ void loop() {
   if (var.btnCalibInputState == HIGH) {
     if (var.setiny_x100 - var.prevMls >= 1000) {
       var.prevMls = var.setiny_x100;
-      kalibChannels();                  //zavolej funkci na kalibraci  
+      kalibChannels();                      //zavolej funkci na kalibraci  
     }
   } else {
     var.setiny_x100 = 0;                    //vynulovani promennych aby musela pred volanim fce kalibChannels()
