@@ -83,16 +83,10 @@ float countVolage(int sumOfSamples, int channel) {
   case 1: // 1. channel 
     var.vin = var.vout / (ch1.R2/(ch1.R1 + ch2.R2));
     break;
-    
   case 2: // 2. channel 
     var.vin = var.vout / (ch2.R2/(ch2.R1 + ch2.R2));
     break;
-  
-  case 3: // kalibrace 
-    var.vin = var.vout / (ch2.R2/(ch2.R1 + ch2.R2));
-    break;
-      
-  default: // 
+  default: 
     ;
     break;
   }
@@ -113,25 +107,11 @@ void kalibChannels() {
   Serial.print(" = ");
   var.diffOfChannels = ch1.sumKalib - ch2.sumKalib;
   Serial.println(var.diffOfChannels);
-  ch2.sumKalib += var.diffOfChannels; //jen pro kontrolu ve vypisu
-  ch2.offset = 0;
-  Serial.println(" ");
-  Serial.print(ch2.offset);
-  ch2.offset = countVolage((var.diffOfChannels), 3);  
-  Serial.print(" -> ");
-  Serial.println(ch2.offset);
-
-  
   Serial.println("kalibrovano");
   delay(1000);
   digitalWrite(pofa.ledBlue, LOW);
+  Serial.println(" ");
 
-  Serial.print(ch1.sumKalib);
-  Serial.print(" - ");
-  Serial.print(ch2.sumKalib);
-  Serial.print(" = ");
-  var.diffOfChannels = ch1.sumKalib - ch2.sumKalib;
-  Serial.println(var.diffOfChannels);
 }
 
 void loop() {
@@ -171,6 +151,7 @@ void loop() {
     for (int i = 0; i<10; i++) {
       ch2.sum += ch2.arr_value[i];
     }
+    ch2.sum += var.diffOfChannels;
     ch2.vin = countVolage(ch2.sum, 2) * ch2.offset;
     Serial.println(ch2.vin);
     ch2.sumKalib = ch2.sum;
