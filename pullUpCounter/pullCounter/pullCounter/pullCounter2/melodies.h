@@ -122,9 +122,10 @@ int melody_godfather[] = {
 };
 
 int melody_newRecord[] = {
-  NOTE_E4, 8, NOTE_E4, 8, NOTE_G4, 4
+  //NOTE_E4, 8, NOTE_E4, 8, NOTE_G4, 4
+  NOTE_G4, 4
 };  
 
-int melody_almost1[] = {
-  NOTE_A4, 8
+int melody_reset[] = {
+  NOTE_A4, 8, NOTE_B4, 8, NOTE_C4, 8
 };  

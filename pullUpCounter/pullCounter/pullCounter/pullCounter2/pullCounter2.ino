@@ -105,7 +105,7 @@ int checkWeight() {
     tzmV.w1 = abs(scale.get_units(2)); 
     //Serial.println(tzmV.w1);   
   }
-  if (tzmV.w1 > 200) {                     // tohle pred nasazenim zvednout alespon na 2000
+  if (tzmV.w1 > 500) {                     // tohle pred nasazenim zvednout alespon na 2000
    Serial.print("w1: ");
    Serial.println(tzmV.w1);    
     return 1;
@@ -114,11 +114,12 @@ int checkWeight() {
   }
 }
 
- void melodyMaker(int melodyNr) {
+void melodyMaker(int melodyNr) {
   //melody_tetris - 1
   //melody_vampireKiller - 2
   //melody_godfather - 3
   //melody_newRecord - 4
+  //melody_reset
   
   int wholenote = 0;
   int divider = 0, noteDuration = 0;
@@ -196,16 +197,16 @@ int checkWeight() {
     case 5:
      tempo = 120;
      wholenote = (60000 * 4) / tempo;
-     notes = sizeof(melody_almost1)/sizeof(melody_almost1[0])/2;
+     notes = sizeof(melody_reset)/sizeof(melody_reset[0])/2;
      for (int thisNote = 0; thisNote < notes * 2; thisNote = thisNote + 2) {
-      divider = melody_almost1[thisNote + 1];
+      divider = melody_reset[thisNote + 1];
       if (divider > 0) {
         noteDuration = (wholenote) / divider;
       } else if (divider < 0) {
         noteDuration = (wholenote) / abs(divider);
         noteDuration *= 1.5; // increases the duration in half for dotted notes
       }
-      tone(piezoPin, melody_almost1[thisNote], noteDuration*0.9);
+      tone(piezoPin, melody_reset[thisNote], noteDuration*0.9);
       delay(noteDuration);
     }
     break;
@@ -310,6 +311,7 @@ storage = EEPROM_readlong(0x00); //read it and put it in our newly created unsig
       Serial.println(tmV.actT);
       tmV.maxT = tmV.actT;
       EEPROM_writelong(0x00, tmV.maxT);
+      melodyMaker(4);
     }
 
     
